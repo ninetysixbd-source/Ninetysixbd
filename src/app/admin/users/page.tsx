@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { User } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import {
     Table,
@@ -11,7 +12,7 @@ import {
 import { updateUserRole } from "@/app/actions/user-actions"
 
 export default async function AdminUsersPage() {
-    let users = []
+    let users: User[] = []
     try {
         users = await prisma.user.findMany({
             orderBy: { createdAt: 'desc' }
