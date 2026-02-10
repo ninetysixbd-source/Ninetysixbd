@@ -5,7 +5,7 @@ import { Trash } from "lucide-react"
 import { deleteOffer } from "@/app/actions/deal-actions"
 
 export default async function AdminDealsPage() {
-    let offers = []
+    let offers: Awaited<ReturnType<typeof prisma.offer.findMany>> = []
     try {
         offers = await prisma.offer.findMany({
             orderBy: { createdAt: 'desc' }

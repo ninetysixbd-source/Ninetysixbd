@@ -6,7 +6,9 @@ import { deleteCategory } from "@/app/actions/category-actions"
 import { revalidatePath } from "next/cache"
 
 export default async function AdminCategoriesPage() {
-    let categories = []
+    let categories: Awaited<ReturnType<typeof prisma.category.findMany<{
+        include: { _count: { select: { products: true } } }
+    }>>> = []
     try {
         categories = await prisma.category.findMany({
             include: { _count: { select: { products: true } } },
