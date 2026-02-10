@@ -17,26 +17,14 @@ interface AddressBookProps {
 
 export function AddressBook({ addresses }: AddressBookProps) {
     const router = useRouter()
-    const [isOpen, setIsOpen] = useState(false)
-    const [editingAddress, setEditingAddress] = useState<any>(null)
     const [loadingId, setLoadingId] = useState<string | null>(null)
-
-    const handleEdit = (address: any) => {
-        setEditingAddress(address)
-        setIsOpen(true)
-    }
-
-    const handleCreate = () => {
-        setEditingAddress(null)
-        setIsOpen(true)
-    }
 
     const handleDelete = async (id: string) => {
         try {
             setLoadingId(id)
             await deleteAddress(id)
             toast.success("Address deleted")
-            return
+            router.refresh() // Refresh to update list
         } catch (error) {
             toast.error("Failed to delete address")
         } finally {
@@ -66,26 +54,13 @@ export function AddressBook({ addresses }: AddressBookProps) {
                         Manage your shipping addresses.
                     </p>
                 </div>
-                <Button onClick={handleCreate} className="flex gap-2">
-                    <Plus className="h-4 w-4" />
-                    Add Address
-                </Button>
+                <AddressForm>
+                    <Button className="flex gap-2">
+                        <Plus className="h-4 w-4" />
+                        Add Address
+                    </Button>
+                </AddressForm>
             </div>
-
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                        <DialogTitle>{editingAddress ? "Edit Address" : "Add New Address"}</DialogTitle>
-                        <DialogDescription>
-                            {editingAddress ? "Update your shipping details below." : "Enter your shipping details below."}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <AddressForm
-                        address={editingAddress}
-                        onSuccess={() => setIsOpen(false)}
-                    />
-                </DialogContent>
-            </Dialog>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {addresses.map((address) => (
@@ -107,9 +82,11 @@ export function AddressBook({ addresses }: AddressBookProps) {
                         </CardContent>
                         <CardFooter className="flex justify-between border-t pt-4">
                             <div className="flex gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleEdit(address)} disabled={loadingId === address.id}>
-                                    <Pencil className="h-4 w-4" />
-                                </Button>
+                                <AddressForm initialData={address}>
+                                    <Button variant="ghost" size="icon" disabled={loadingId === address.id}>
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                </AddressForm>
                                 <Button variant="ghost" size="icon" onClick={() => handleDelete(address.id)} className="text-destructive hover:text-destructive" disabled={loadingId === address.id}>
                                     {loadingId === address.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 </Button>

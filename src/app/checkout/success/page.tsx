@@ -13,9 +13,7 @@ export default function OrderSuccessPage() {
                 You will receive a confirmation email shortly.
             </p>
             <div className="flex gap-4 mt-6">
-                <Button asChild onClick={() => {
-                    // In a real app, clear cart here if not already cleared
-                }}>
+                <Button asChild>
                     <Link href="/products">Continue Shopping</Link>
                 </Button>
                 <Button variant="outline" asChild>

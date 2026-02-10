@@ -1,4 +1,4 @@
-import { Toggle } from "@radix-ui/react-toggle"
+import * as Toggle from "@radix-ui/react-toggle"
 import { cn } from "@/lib/utils"
 import * as React from "react"
 

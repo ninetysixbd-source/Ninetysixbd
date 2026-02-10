@@ -273,3 +273,56 @@ export async function updateUserRole(userId: string, role: 'ADMIN' | 'USER') {
         return { error: "Failed to update role" }
     }
 }
+
+const userProfileSchema = z.object({
+    name: z.string().optional(),
+    password: z.string().optional(),
+})
+
+export async function updateUserProfile(userId: string, data: z.infer<typeof userProfileSchema>) {
+    const session = await auth()
+    if (!session?.user?.id || session.user.id !== userId) {
+        throw new Error("Unauthorized")
+    }
+
+    const validated = userProfileSchema.parse(data)
+    const updateData: any = {}
+
+    if (validated.name) updateData.name = validated.name
+    if (validated.password) {
+        updateData.password = await hash(validated.password, 10)
+    }
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: updateData,
+    })
+
+    revalidatePath("/account")
+    return { success: true }
+}
+
+const userAddressSchema = z.object({
+    presentAddress: z.string().optional(),
+    permanentAddress: z.string().optional(),
+})
+
+export async function updateUserAddress(userId: string, data: z.infer<typeof userAddressSchema>) {
+    const session = await auth()
+    if (!session?.user?.id || session.user.id !== userId) {
+        throw new Error("Unauthorized")
+    }
+
+    const validated = userAddressSchema.parse(data)
+
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            presentAddress: validated.presentAddress,
+            permanentAddress: validated.permanentAddress,
+        },
+    })
+
+    revalidatePath("/account")
+    return { success: true }
+}
