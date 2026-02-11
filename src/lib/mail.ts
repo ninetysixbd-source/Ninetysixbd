@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer"
 
-const domain = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+// Use the same URL that NextAuth uses
+const domain = process.env.NEXTAUTH_URL || process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
     const resetLink = `${domain}/reset-password?token=${token}`
