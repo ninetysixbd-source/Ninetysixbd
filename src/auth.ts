@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+    trustHost: true,
+    debug: process.env.NODE_ENV === "development" || true, // Enable debug logs on Vercel temporarily
     adapter: PrismaAdapter(prisma) as any,
     providers: [
         Google,
