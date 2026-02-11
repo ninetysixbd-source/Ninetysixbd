@@ -10,7 +10,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     debug: process.env.NODE_ENV === "development" || true, // Enable debug logs on Vercel temporarily
     adapter: PrismaAdapter(prisma) as any,
     providers: [
-        Google,
+        Google({
+            checks: ["state"],
+        }),
         Credentials({
             name: "credentials",
             credentials: {
