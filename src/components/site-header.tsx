@@ -95,7 +95,7 @@ export function SiteHeader() {
                                             <Button
                                                 variant="outline"
                                                 className="w-full justify-start text-base font-medium border-b border-t-0 border-x-0 rounded-none px-0 h-auto py-3 hover:bg-transparent"
-                                                onClick={() => signIn("google")}
+                                                onClick={() => setLoginOpen(true)}
                                             >
                                                 Login/Registration
                                             </Button>
