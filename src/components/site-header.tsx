@@ -147,18 +147,17 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
 
                                     <div className="px-6 mt-8 space-y-4 text-sm text-muted-foreground">
                                         <p className="leading-relaxed">
-                                            Address: Mahim ganguly road, Mina bazar, <br />
-                                            Tan bazar, Narayanganj, <br />
-                                            Dhaka,Bangladesh
+                                            Address: Tolla Shobujbag, Fatullah, <br />
+                                            Narayanganj-1400
                                         </p>
                                         <div className="space-y-2">
                                             <div className="flex items-center gap-2">
                                                 <Mail className="h-4 w-4" />
-                                                <span className="text-black font-semibold">ninetysibd@gmail.com</span>
+                                                <span className="text-black font-semibold">ninety6lifestyle@gmail.com</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Phone className="h-4 w-4" />
-                                                <span className="text-black font-bold">(+880) 1896-063801</span>
+                                                <span className="text-black font-bold">+880 162 31396715</span>
                                             </div>
                                         </div>
                                     </div>
