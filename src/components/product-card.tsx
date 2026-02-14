@@ -29,7 +29,7 @@ export function ProductCard({ product }: ProductCardProps) {
                             )}
                         </div>
                     </Link>
-                    {product.status === 'PUBLISHED' && product.stock <= 0 && (
+                    {product.status === 'PUBLISHED' && (product.stock <= 0 || !product.inStock) && (
                         <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider z-10">Out of Stock</div>
                     )}
 

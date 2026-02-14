@@ -27,6 +27,7 @@ export async function createProduct(data: ProductFormValues) {
         await prisma.product.create({
             data: {
                 ...parsed.data,
+                inStock: parsed.data.inStock ?? true,
             },
         })
     } catch (error) {
@@ -52,6 +53,7 @@ export async function updateProduct(id: string, data: ProductFormValues) {
             where: { id },
             data: {
                 ...parsed.data,
+                inStock: parsed.data.inStock ?? true,
             },
         })
     } catch (error) {

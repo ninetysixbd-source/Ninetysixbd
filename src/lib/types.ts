@@ -8,4 +8,5 @@ export type SerializableProduct = Omit<Product, "price" | "salePrice"> & {
     colors?: any
     discountPercentage?: number | null
     category?: { name: string }
+    inStock?: boolean
 }

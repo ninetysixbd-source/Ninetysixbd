@@ -46,7 +46,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                     <h1 className="text-3xl font-bold tracking-tight">{product.name}</h1>
                     <p className="mt-2 text-muted-foreground">{product.category?.name || "Category"}</p>
                 </div>
-                {product.stock <= 0 && (
+                {(!product.inStock || product.stock <= 0) && (
                     <Badge variant="destructive">Out of Stock</Badge>
                 )}
             </div>
@@ -159,14 +159,20 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 />
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t">
-                    <AddToCartButton
-                        product={product}
-                        size={selectedSize}
-                        color={selectedColor}
-                        quantity={quantity}
-                        buttonSize="lg"
-                        className="w-full md:w-auto flex-1 bg-black hover:bg-black/90 text-white"
-                    />
+                    {product.inStock && product.stock > 0 ? (
+                        <AddToCartButton
+                            product={product}
+                            size={selectedSize}
+                            color={selectedColor}
+                            quantity={quantity}
+                            buttonSize="lg"
+                            className="w-full md:w-auto flex-1 bg-black hover:bg-black/90 text-white"
+                        />
+                    ) : (
+                        <Button disabled size="lg" className="w-full md:w-auto flex-1">
+                            Out of Stock
+                        </Button>
+                    )}
                     <Button variant="outline" size="lg" className="flex-1">Add to Wishlist</Button>
                 </div>
             </div>

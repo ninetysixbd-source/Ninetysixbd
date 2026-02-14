@@ -8,6 +8,7 @@ export const productSchema = z.object({
     salePrice: z.coerce.number().min(0).optional().nullable(),
     discountPercentage: z.coerce.number().min(0).max(100, "Discount must be between 0-100").optional().nullable(),
     stock: z.coerce.number().min(0, "Stock must be positive"),
+    inStock: z.boolean().default(true).optional(),
     status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]),
     categoryId: z.string().min(1, "Category is required"),
     images: z.array(z.string()).min(1, "At least one image is required"),

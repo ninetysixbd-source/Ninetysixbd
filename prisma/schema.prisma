@@ -103,6 +103,7 @@ model Product {
   sizes              Json?       // {available: ['S', 'M', 'L'], unavailable: ['XL', 'XXL']}
   colors             Json?       // {available: ['Red', 'Blue'], unavailable: []}
   stock              Int         @default(0)
+  inStock            Boolean     @default(true)
   status             String      @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
   categoryId         String
   category           Category    @relation(fields: [categoryId], references: [id])

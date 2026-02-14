@@ -27,6 +27,7 @@ export interface Product {
     images: string[]
     description?: string
     slug: string
+    inStock?: boolean
 }
 
 interface ProductQuickViewProps {
@@ -118,7 +119,7 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                     <div className="p-6 md:p-8 flex flex-col h-full bg-white">
                         <div className="flex justify-between items-start mb-2">
                             <h2 className="text-2xl font-bold">{product.name}</h2>
-                            {product.stock <= 0 && <Badge variant="destructive">Out of Stock</Badge>}
+                            {(product.stock <= 0 || product.inStock === false) && <Badge variant="destructive">Out of Stock</Badge>}
                         </div>
 
                         <div className="flex items-baseline gap-2 mb-4">
@@ -222,10 +223,10 @@ export function ProductQuickView({ open, onOpenChange, product }: ProductQuickVi
                         </div>
 
                         <div className="mt-auto pt-4 border-t grid grid-cols-2 gap-3">
-                            <Button className="w-full h-10 bg-black text-white hover:bg-black/90 px-2" onClick={handleAddToCart} disabled={product.stock <= 0}>
+                            <Button className="w-full h-10 bg-black text-white hover:bg-black/90 px-2" onClick={handleAddToCart} disabled={product.stock <= 0 || product.inStock === false}>
                                 Add to Cart
                             </Button>
-                            <Button className="w-full h-10 px-2" variant="outline" onClick={handleBuyNow} disabled={product.stock <= 0}>Buy Now</Button>
+                            <Button className="w-full h-10 px-2" variant="outline" onClick={handleBuyNow} disabled={product.stock <= 0 || product.inStock === false}>Buy Now</Button>
                         </div>
 
                         <div className="text-xs text-muted-foreground mt-4 text-center">

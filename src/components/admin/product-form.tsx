@@ -28,6 +28,7 @@ import { FileUpload } from "@/components/file-upload"
 import { SizeSelector } from "@/components/admin/size-selector"
 import { ColorSelector } from "@/components/admin/color-selector"
 import { toast } from "sonner"
+import { Switch } from "@/components/ui/switch"
 
 interface ProductFormProps {
     categories: { id: string; name: string }[]
@@ -48,6 +49,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             salePrice: initialData.salePrice || null,
             discountPercentage: initialData.discountPercentage || null,
             stock: initialData.stock,
+            inStock: initialData.inStock ?? true,
             status: initialData.status,
             categoryId: initialData.categoryId,
             images: initialData.images || [],
@@ -61,6 +63,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
             salePrice: null,
             discountPercentage: null,
             stock: 0,
+            inStock: true,
             status: "PUBLISHED",
             categoryId: "",
             images: [],
@@ -185,38 +188,127 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                         )}
                     />
 
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="stock"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Stock Quantity</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" min="0" step="1" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="inStock"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                    <div className="space-y-0.5">
+                                        <FormLabel>In Stock</FormLabel>
+                                        <div className="text-[0.8rem] text-muted-foreground">
+                                            Mark as available for purchase
+                                        </div>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                            control={form.control}
+                            name="discountPercentage"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Discount % (Optional)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            step="1"
+                                            placeholder="e.g., 20 for 20% off"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                            onChange={handleDiscountChange}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="salePrice"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sale Price (Tk)</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="Auto-calculated from discount"
+                                            {...field}
+                                            value={field.value ?? ""}
+                                            readOnly
+                                            className="bg-muted"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
                     <FormField
                         control={form.control}
-                        name="stock"
+                        name="categoryId"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Stock Quantity</FormLabel>
-                                <FormControl>
-                                    <Input type="number" min="0" step="1" {...field} />
-                                </FormControl>
+                                <FormLabel>Category</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a category" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {categories.map((category) => (
+                                            <SelectItem key={category.id} value={category.id}>
+                                                {category.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
-                        name="discountPercentage"
+                        name="sizes"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Discount % (Optional)</FormLabel>
+                                <FormLabel>Product Sizes (Optional)</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        max="100"
-                                        step="1"
-                                        placeholder="e.g., 20 for 20% off"
-                                        {...field}
-                                        value={field.value ?? ""}
-                                        onChange={handleDiscountChange}
+                                    <SizeSelector
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -226,130 +318,64 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
                     <FormField
                         control={form.control}
-                        name="salePrice"
+                        name="colors"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Sale Price (Tk)</FormLabel>
+                                <FormLabel>Product Colors (Optional)</FormLabel>
                                 <FormControl>
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="Auto-calculated from discount"
-                                        {...field}
-                                        value={field.value ?? ""}
-                                        readOnly
-                                        className="bg-muted"
+                                    <ColorSelector
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                </div>
 
-                <FormField
-                    control={form.control}
-                    name="categoryId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Category</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormField
+                        control={form.control}
+                        name="images"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Product Images</FormLabel>
                                 <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
+                                    <FileUpload
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    />
                                 </FormControl>
-                                <SelectContent>
-                                    {categories.map((category) => (
-                                        <SelectItem key={category.id} value={category.id}>
-                                            {category.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                <FormField
-                    control={form.control}
-                    name="sizes"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Product Sizes (Optional)</FormLabel>
-                            <FormControl>
-                                <SizeSelector
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="status"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Status</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select status" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="DRAFT">Draft</SelectItem>
+                                        <SelectItem value="PUBLISHED">Published</SelectItem>
+                                        <SelectItem value="ARCHIVED">Archived</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-                <FormField
-                    control={form.control}
-                    name="colors"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Product Colors (Optional)</FormLabel>
-                            <FormControl>
-                                <ColorSelector
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="images"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Product Images</FormLabel>
-                            <FormControl>
-                                <FileUpload
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    <SelectItem value="DRAFT">Draft</SelectItem>
-                                    <SelectItem value="PUBLISHED">Published</SelectItem>
-                                    <SelectItem value="ARCHIVED">Archived</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <Button type="submit" disabled={isPending}>
-                    {isPending ? "Saving..." : initialData ? "Update Product" : "Create Product"}
-                </Button>
+                    <Button type="submit" disabled={isPending}>
+                        {isPending ? "Saving..." : initialData ? "Update Product" : "Create Product"}
+                    </Button>
             </form>
         </Form>
     )
