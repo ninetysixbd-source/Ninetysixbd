@@ -25,14 +25,34 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+// ... imports
+import {
+        DropdownMenu,
+        DropdownMenuContent,
+        DropdownMenuItem,
+        DropdownMenuSeparator,
+        DropdownMenuTrigger,
+        DropdownMenuSub,
+        DropdownMenuSubContent,
+        DropdownMenuSubTrigger,
+    } from "@/components/ui/dropdown-menu"
 
-export function SiteHeader() {
+interface CategoryWithChildren {
+    id: string
+    name: string
+    slug: string
+    children: {
+        id: string
+        name: string
+        slug: string
+    }[]
+}
+
+interface SiteHeaderProps {
+    categories?: CategoryWithChildren[]
+}
+
+export function SiteHeader({ categories = [] }: SiteHeaderProps) {
     const [loginOpen, setLoginOpen] = useState(false)
     const [registerOpen, setRegisterOpen] = useState(false)
     const { data: session, status } = useSession()
@@ -62,19 +82,44 @@ export function SiteHeader() {
                                         <Link href="/" className="block py-3 text-lg font-medium text-red-600">Home</Link>
 
                                         <Accordion type="single" collapsible className="w-full border-none">
-                                            <AccordionItem value="shop" className="border-b-0">
-                                                <AccordionTrigger className="py-3 text-lg font-medium hover:no-underline font-bold">Shop</AccordionTrigger>
+                                            <AccordionItem value="categories" className="border-b-0">
+                                                <AccordionTrigger className="py-3 text-lg font-medium hover:no-underline font-bold">Categories</AccordionTrigger>
                                                 <AccordionContent className="pl-4 space-y-2">
-                                                    <Link href="/products?category=winter" className="block py-2 text-base text-muted-foreground">Winter Items</Link>
-                                                    <Link href="/products?category=summer" className="block py-2 text-base text-muted-foreground">Summer Items</Link>
+                                                    {categories.map((category) => (
+                                                        <div key={category.id}>
+                                                            <Link
+                                                                href={`/products?category=${category.slug}`}
+                                                                className="block py-2 text-base font-medium"
+                                                            >
+                                                                {category.name}
+                                                            </Link>
+                                                            {category.children && category.children.length > 0 && (
+                                                                <div className="pl-4 space-y-1 border-l ml-1">
+                                                                    {category.children.map((child) => (
+                                                                        <Link
+                                                                            key={child.id}
+                                                                            href={`/products?category=${child.slug}`}
+                                                                            className="block py-1 text-sm text-muted-foreground"
+                                                                        >
+                                                                            {child.name}
+                                                                        </Link>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    {categories.length === 0 && (
+                                                        <p className="text-sm text-muted-foreground">No categories found</p>
+                                                    )}
                                                 </AccordionContent>
                                             </AccordionItem>
                                         </Accordion>
 
-                                        <Link href="/products" className="block py-3 text-lg font-bold">Categories</Link>
+                                        <Link href="/products" className="block py-3 text-lg font-bold">All Products</Link>
                                         <Link href="/about" className="block py-3 text-lg font-bold">About Us</Link>
 
                                         {isAdmin && (
+                                            // ... rest of the file
                                             <Link href="/admin" className="block py-3 text-lg font-bold text-primary">
                                                 <Shield className="inline h-5 w-5 mr-2" />
                                                 Admin Dashboard
@@ -140,7 +185,45 @@ export function SiteHeader() {
                     <Link href="/products" className="flex items-center space-x-1 cursor-pointer hover:text-black/70 font-semibold text-lg group">
                         <span>Shop</span>
                     </Link>
-                    <Link href="/products" className="transition-colors hover:text-black/70 font-semibold text-lg">Categories</Link>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className="transition-colors hover:text-black/70 font-semibold text-lg flex items-center outline-none">
+                            Categories <ChevronDown className="ml-1 h-4 w-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="w-48">
+                            <DropdownMenuItem asChild>
+                                <Link href="/products">All Categories</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {categories.map((category) => (
+                                category.children && category.children.length > 0 ? (
+                                    <DropdownMenuSub key={category.id}>
+                                        <DropdownMenuSubTrigger>
+                                            <Link href={`/products?category=${category.slug}`} className="w-full block">
+                                                {category.name}
+                                            </Link>
+                                        </DropdownMenuSubTrigger>
+                                        <DropdownMenuSubContent>
+                                            {category.children.map((child) => (
+                                                <DropdownMenuItem key={child.id} asChild>
+                                                    <Link href={`/products?category=${child.slug}`}>
+                                                        {child.name}
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuSubContent>
+                                    </DropdownMenuSub>
+                                ) : (
+                                    <DropdownMenuItem key={category.id} asChild>
+                                        <Link href={`/products?category=${category.slug}`}>
+                                            {category.name}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <Link href="/about" className="transition-colors hover:text-black/70 font-semibold text-lg">About Us</Link>
                 </nav>
 

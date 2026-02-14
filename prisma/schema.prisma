@@ -86,6 +86,9 @@ model Category {
   name     String
   slug     String    @unique
   products Product[]
+  parentId String?
+  parent   Category? @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
 }
 
 model Product {

@@ -17,16 +17,26 @@ export const metadata: Metadata = {
   description: "Modern E-commerce Store",
 };
 
-export default function RootLayout({
+import { prisma } from "@/lib/prisma"
+
+// ... imports
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await prisma.category.findMany({
+    where: { parentId: null }, // Only fetch top-level categories
+    include: { children: true },
+    orderBy: { name: 'asc' }
+  })
+
   return (
     <html lang="en">
       <body className={cn(inter.className, "min-h-screen bg-background antialiased overflow-x-hidden")}>
         <Providers>
-          <SiteHeader />
+          <SiteHeader categories={categories} />
           <div className="flex-1">
             {children}
           </div>

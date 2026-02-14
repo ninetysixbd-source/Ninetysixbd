@@ -7,15 +7,29 @@ import { createCategory } from "@/app/actions/category-actions"
 import { toast } from "sonner"
 import { useState } from "react"
 
-export function CategoryForm() {
+// ... imports
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+
+export function CategoryForm({ categories }: { categories: { id: string, name: string }[] }) {
     const [name, setName] = useState("")
     const [slug, setSlug] = useState("")
+    const [parentId, setParentId] = useState<string>("none")
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
-        const res = await createCategory({ name, slug })
+        const res = await createCategory({
+            name,
+            slug,
+            parentId: parentId === "none" ? undefined : parentId
+        })
         setLoading(false)
 
         if (res.error) {
@@ -24,6 +38,7 @@ export function CategoryForm() {
             toast.success("Category created")
             setName("")
             setSlug("")
+            setParentId("none")
         }
     }
 
@@ -49,6 +64,22 @@ export function CategoryForm() {
                     placeholder="e.g. winter-collection"
                     required
                 />
+            </div>
+            <div className="space-y-2">
+                <Label>Parent Category</Label>
+                <Select value={parentId} onValueChange={setParentId}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select parent category (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="none">None (Top Level)</SelectItem>
+                        {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                                {cat.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Creating..." : "Create Category"}
