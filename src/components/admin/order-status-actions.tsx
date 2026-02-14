@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
     Select,
@@ -39,6 +40,8 @@ const STATUS_OPTIONS = [
 export function OrderStatusActions({ orderId, currentStatus }: OrderStatusActionsProps) {
     const [status, setStatus] = useState(currentStatus)
     const [isPending, startTransition] = useTransition()
+    const router = useRouter()
+    const [isCancelOpen, setIsCancelOpen] = useState(false)
 
     const isCancelled = currentStatus === "CANCELLED"
     const isDelivered = currentStatus === "DELIVERED"
@@ -52,17 +55,22 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                 toast.error(result.error)
             } else {
                 toast.success(`Order status updated to ${status}`)
+                router.refresh()
             }
         })
     }
 
-    function handleCancel() {
+    function handleCancel(e: React.MouseEvent) {
+        e.preventDefault()
+
         startTransition(async () => {
             const result = await cancelOrder(orderId)
             if (result.error) {
                 toast.error(result.error)
             } else {
                 toast.success("Order cancelled successfully")
+                setIsCancelOpen(false)
+                router.refresh()
             }
         })
     }
@@ -106,7 +114,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             </div>
 
             {!isDelivered && (
-                <AlertDialog>
+                <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
                     <AlertDialogTrigger asChild>
                         <Button variant="destructive" disabled={isPending}>
                             Cancel Order
@@ -121,9 +129,20 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Keep Order</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                Yes, Cancel Order
+                            <AlertDialogCancel disabled={isPending}>Keep Order</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleCancel}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                disabled={isPending}
+                            >
+                                {isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Cancelling...
+                                    </>
+                                ) : (
+                                    "Yes, Cancel Order"
+                                )}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
