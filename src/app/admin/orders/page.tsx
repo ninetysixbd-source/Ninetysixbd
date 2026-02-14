@@ -98,11 +98,13 @@ export default async function AdminOrdersPage(props: AdminOrdersPageProps) {
                                     <TableCell>
                                         <Badge
                                             variant={
-                                                order.status === "PENDING"
-                                                    ? "secondary"
-                                                    : order.status === "DELIVERED"
-                                                        ? "default"
-                                                        : "outline"
+                                                order.status === "CANCELLED"
+                                                    ? "destructive"
+                                                    : order.status === "PENDING"
+                                                        ? "secondary"
+                                                        : order.status === "DELIVERED"
+                                                            ? "default"
+                                                            : "outline"
                                             }
                                         >
                                             {order.status}

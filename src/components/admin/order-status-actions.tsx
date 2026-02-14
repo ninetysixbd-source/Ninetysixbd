@@ -10,16 +10,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import {
-    AlertDialog,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { updateOrderStatus, cancelOrder } from "@/app/actions/order-actions"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -40,8 +30,8 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
     const [status, setStatus] = useState(currentStatus)
     const [isPending, startTransition] = useTransition()
     const [isCancelling, setIsCancelling] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
     const router = useRouter()
-    const [isCancelOpen, setIsCancelOpen] = useState(false)
 
     const isCancelled = currentStatus === "CANCELLED"
     const isDelivered = currentStatus === "DELIVERED"
@@ -61,9 +51,6 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         })
     }
 
-    // Cancel uses its own state instead of startTransition
-    // because startTransition defers state updates (including setIsCancelOpen),
-    // which prevents the dialog overlay from closing properly
     async function handleCancel() {
         setIsCancelling(true)
         try {
@@ -71,23 +58,23 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             if (result.error) {
                 toast.error(result.error)
                 setIsCancelling(false)
+                setShowConfirm(false)
             } else {
-                // Close the dialog FIRST - this is immediate since it's not inside startTransition
-                setIsCancelOpen(false)
                 toast.success("Order cancelled successfully")
-                // Navigate away to the orders list to guarantee clean state
-                router.push("/admin/orders")
+                // Navigate away completely — no overlay to get stuck
+                window.location.href = "/admin/orders"
             }
         } catch {
             toast.error("Failed to cancel order")
             setIsCancelling(false)
+            setShowConfirm(false)
         }
     }
 
     if (isCancelled) {
         return (
-            <div className="text-center py-4 text-muted-foreground">
-                This order has been cancelled and cannot be modified.
+            <div className="text-center py-4 text-red-600 font-semibold">
+                ❌ This order has been cancelled and cannot be modified.
             </div>
         )
     }
@@ -123,24 +110,23 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             </div>
 
             {!isDelivered && (
-                <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={isLoading}>
+                <div>
+                    {!showConfirm ? (
+                        <Button
+                            variant="destructive"
+                            disabled={isLoading}
+                            onClick={() => setShowConfirm(true)}
+                        >
                             Cancel Order
                         </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. The order will be marked as cancelled
-                                and the customer will need to place a new order.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isCancelling}>Keep Order</AlertDialogCancel>
+                    ) : (
+                        <div className="flex items-center gap-2 p-3 border border-red-300 rounded-lg bg-red-50">
+                            <span className="text-sm text-red-700 font-medium">
+                                Are you sure? This cannot be undone.
+                            </span>
                             <Button
                                 variant="destructive"
+                                size="sm"
                                 onClick={handleCancel}
                                 disabled={isCancelling}
                             >
@@ -150,14 +136,21 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                                         Cancelling...
                                     </>
                                 ) : (
-                                    "Yes, Cancel Order"
+                                    "Yes, Cancel"
                                 )}
                             </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowConfirm(false)}
+                                disabled={isCancelling}
+                            >
+                                No, Keep
+                            </Button>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     )
 }
-

@@ -53,18 +53,24 @@ export default async function OrdersPage() {
                             </TableRow>
                         ) : (
                             orders.map((order) => (
-                                <TableRow key={order.id}>
-                                    <TableCell className="font-medium">#{order.orderNumber}</TableCell>
+                                <TableRow key={order.id} className={order.status === "CANCELLED" ? "bg-red-50" : ""}>
+                                    <TableCell className={`font-medium ${order.status === "CANCELLED" ? "text-red-600 line-through" : ""}`}>#{order.orderNumber}</TableCell>
                                     <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                                     <TableCell>
                                         <div className="flex flex-col gap-2">
                                             <Badge className="w-fit" variant={
-                                                order.status === "PENDING" ? "secondary" :
-                                                    order.status === "SHIPPED" ? "outline" :
-                                                        order.status === "DELIVERED" ? "default" : "destructive"
+                                                order.status === "CANCELLED" ? "destructive" :
+                                                    order.status === "PENDING" ? "secondary" :
+                                                        order.status === "SHIPPED" ? "outline" :
+                                                            order.status === "DELIVERED" ? "default" : "outline"
                                             }>
                                                 {order.status}
                                             </Badge>
+                                            {order.status === "CANCELLED" && (
+                                                <span className="text-xs text-red-600 font-medium">
+                                                    ❌ Your order has been cancelled
+                                                </span>
+                                            )}
                                             {order.status === "PENDING" && (
                                                 <form action={async () => {
                                                     "use server"
@@ -80,7 +86,7 @@ export default async function OrdersPage() {
                                     <TableCell>
                                         <div className="flex flex-col gap-1">
                                             {order.items.map((item: any) => (
-                                                <span key={item.id} className="text-sm">
+                                                <span key={item.id} className={`text-sm ${order.status === "CANCELLED" ? "text-muted-foreground line-through" : ""}`}>
                                                     {item.quantity}x {item.name}
                                                     {(item.size || item.color) && (
                                                         <span className="text-muted-foreground text-xs ml-1">
@@ -92,7 +98,7 @@ export default async function OrdersPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>{order.paymentMethod}</TableCell>
-                                    <TableCell className="text-right font-medium">
+                                    <TableCell className={`text-right font-medium ${order.status === "CANCELLED" ? "text-red-600 line-through" : ""}`}>
                                         Tk. {Number(order.totalAmount).toLocaleString()}
                                     </TableCell>
                                 </TableRow>
