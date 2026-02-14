@@ -177,6 +177,17 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* Graffiti Banner */}
+      <section className="container py-12">
+        <div className="relative aspect-[21/9] w-full overflow-hidden rounded-xl shadow-2xl">
+          <img
+            src="/ninetysix-banner.jpg"
+            alt="NinetySix Graffiti Art"
+            className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
+          />
+        </div>
+      </section>
     </div>
   )
 }
