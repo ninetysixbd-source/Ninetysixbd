@@ -72,7 +72,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
                         <SheetContent side="left" className="w-[300px] sm:w-[400px] p-0">
                             <div className="flex flex-col h-full">
                                 <SheetHeader className="p-6 border-b">
-                                    <SheetTitle className="text-left text-2xl font-bold tracking-widest uppercase">Tabaz</SheetTitle>
+                                    <SheetTitle className="text-left text-2xl font-bold tracking-widest uppercase">Ninetysix</SheetTitle>
                                 </SheetHeader>
 
                                 <div className="flex-1 overflow-auto py-4">
@@ -157,7 +157,7 @@ export function SiteHeader({ categories = [] }: SiteHeaderProps) {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Phone className="h-4 w-4" />
-                                                <span className="text-black font-bold">+880 162 31396715</span>
+                                                <span className="text-black font-bold">+880 162 1396715</span>
                                             </div>
                                         </div>
                                     </div>
