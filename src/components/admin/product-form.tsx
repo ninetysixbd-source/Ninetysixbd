@@ -287,11 +287,20 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {categories.map((category) => (
-                                            <SelectItem key={category.id} value={category.id}>
-                                                {category.name}
-                                            </SelectItem>
-                                        ))}
+                                        {categories
+                                            .filter((c: any) => !c.parentId) // Top-level categories
+                                            .map((category: any) => (
+                                                <div key={category.id}>
+                                                    <SelectItem value={category.id} className="font-semibold">
+                                                        {category.name}
+                                                    </SelectItem>
+                                                    {category.children?.map((child: any) => (
+                                                        <SelectItem key={child.id} value={child.id} className="pl-6 text-sm">
+                                                            ↳ {child.name}
+                                                        </SelectItem>
+                                                    ))}
+                                                </div>
+                                            ))}
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

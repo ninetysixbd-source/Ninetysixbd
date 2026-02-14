@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import useEmblaCarousel from "embla-carousel-react"
+import Autoplay from "embla-carousel-autoplay"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -18,7 +20,31 @@ interface OffersCarouselProps {
 }
 
 export function OffersCarousel({ offers }: OffersCarouselProps) {
-    // If no offers, show default or nothing
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 3000 })])
+    const [prevBtnEnabled, setPrevBtnEnabled] = React.useState(false)
+    const [nextBtnEnabled, setNextBtnEnabled] = React.useState(false)
+    const [selectedIndex, setSelectedIndex] = React.useState(0)
+    const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([])
+
+    const scrollPrev = React.useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi])
+    const scrollNext = React.useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi])
+    const scrollTo = React.useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi])
+
+    const onSelect = React.useCallback((emblaApi: any) => {
+        setSelectedIndex(emblaApi.selectedScrollSnap())
+        setPrevBtnEnabled(emblaApi.canScrollPrev())
+        setNextBtnEnabled(emblaApi.canScrollNext())
+    }, [])
+
+    React.useEffect(() => {
+        if (!emblaApi) return
+
+        onSelect(emblaApi)
+        setScrollSnaps(emblaApi.scrollSnapList())
+        emblaApi.on("select", onSelect)
+        emblaApi.on("reInit", onSelect)
+    }, [emblaApi, onSelect])
+
     if (!offers || offers.length === 0) {
         return (
             <div className="w-full h-[300px] flex items-center justify-center bg-muted rounded-xl">
@@ -27,73 +53,44 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
         )
     }
 
-    // Use offers prop instead of OFFERS constant
-    const OFFERS = offers
-    const [currentSlide, setCurrentSlide] = React.useState(0)
-    const [isPaused, setIsPaused] = React.useState(false)
-
-    const nextSlide = React.useCallback(() => {
-        setCurrentSlide((prev) => (prev + 1) % offers.length)
-    }, [offers.length])
-
-    const prevSlide = () => {
-        setCurrentSlide((prev) => (prev - 1 + offers.length) % offers.length)
-    }
-
-    React.useEffect(() => {
-        if (isPaused) return
-
-        const interval = setInterval(() => {
-            nextSlide()
-        }, 2000)
-
-        return () => clearInterval(interval)
-    }, [isPaused, nextSlide])
-
     return (
-        <div
-            className="relative w-full h-[400px] overflow-hidden rounded-xl"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
-        >
-            <div
-                className="flex transition-transform duration-500 ease-in-out h-full"
-                style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-            >
-                {offers.map((offer) => (
-                    <div
-                        key={offer.id}
-                        className={`min-w-full h-full flex flex-col items-center justify-center p-8 text-center relative ${!offer.image ? offer.backgroundColor : 'bg-black/50'}`}
-                    >
-                        {/* Background Image */}
-                        {offer.image && (
-                            <>
-                                <img
-                                    src={offer.image}
-                                    alt={offer.title}
-                                    className="absolute inset-0 w-full h-full object-cover -z-20"
-                                />
-                                {/* Overlay for readability */}
-                                <div className="absolute inset-0 bg-black/40 -z-10" />
-                            </>
-                        )}
+        <div className="relative w-full h-[400px] overflow-hidden rounded-xl group">
+            <div className="h-full" ref={emblaRef}>
+                <div className="flex h-full">
+                    {offers.map((offer) => (
+                        <div key={offer.id} className={`relative flex-[0_0_100%] min-w-0 h-full flex flex-col items-center justify-center p-8 text-center ${!offer.image ? offer.backgroundColor : 'bg-black/50'}`}>
+                            {/* Background Image */}
+                            {offer.image && (
+                                <>
+                                    <img
+                                        src={offer.image}
+                                        alt={offer.title}
+                                        className="absolute inset-0 w-full h-full object-cover -z-20"
+                                    />
+                                    {/* Overlay for readability */}
+                                    <div className="absolute inset-0 bg-black/40 -z-10" />
+                                </>
+                            )}
 
-                        <div className="relative z-10 text-white">
-                            <h2 className="text-4xl font-bold mb-4 drop-shadow-md">{offer.title}</h2>
-                            <p className="text-xl mb-6 drop-shadow-md opacity-90">{offer.description}</p>
-                            <Link href="/categories">
-                                <Button className="bg-white text-black hover:bg-white/90" size="lg">Shop Now</Button>
-                            </Link>
+                            <div className="relative z-10 text-white">
+                                <h2 className="text-4xl font-bold mb-4 drop-shadow-md">{offer.title}</h2>
+                                <p className="text-xl mb-6 drop-shadow-md opacity-90">{offer.description}</p>
+                                <Link href="/products?sort=discount">
+                                    <Button className="bg-white text-black hover:bg-white/90" size="lg">Shop Now</Button>
+                                </Link>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
+            {/* Navigation Buttons */}
             <Button
                 variant="outline"
                 size="icon"
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/80"
-                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={scrollPrev}
+                disabled={!prevBtnEnabled}
             >
                 <ChevronLeft className="h-6 w-6" />
                 <span className="sr-only">Previous slide</span>
@@ -102,20 +99,21 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
             <Button
                 variant="outline"
                 size="icon"
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/80"
-                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-background/50 hover:bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={scrollNext}
+                disabled={!nextBtnEnabled}
             >
                 <ChevronRight className="h-6 w-6" />
                 <span className="sr-only">Next slide</span>
             </Button>
 
+            {/* Dots */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                {offers.map((_, index) => (
+                {scrollSnaps.map((_, index) => (
                     <button
                         key={index}
-                        className={`w-3 h-3 rounded-full transition-colors ${index === currentSlide ? "bg-primary" : "bg-primary/20"
-                            }`}
-                        onClick={() => setCurrentSlide(index)}
+                        className={`w-3 h-3 rounded-full transition-colors ${index === selectedIndex ? "bg-primary" : "bg-primary/20"}`}
+                        onClick={() => scrollTo(index)}
                     />
                 ))}
             </div>

@@ -67,6 +67,9 @@ export async function updateProduct(id: string, data: ProductFormValues) {
 
 export async function getCategories() {
     return await prisma.category.findMany({
-        orderBy: { name: 'asc' }
+        orderBy: { name: 'asc' },
+        include: {
+            children: true
+        }
     })
 }
