@@ -385,6 +385,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
                     <Button type="submit" disabled={isPending}>
                         {isPending ? "Saving..." : initialData ? "Update Product" : "Create Product"}
                     </Button>
+                </div>
             </form>
         </Form>
     )
