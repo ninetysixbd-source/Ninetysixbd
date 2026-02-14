@@ -154,7 +154,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
                 </div>
 
                 <div
-                    className="prose prose-sm max-w-none text-muted-foreground my-8"
+                    className="prose prose-sm max-w-none text-muted-foreground my-8 whitespace-pre-wrap"
                     dangerouslySetInnerHTML={{ __html: product.description }}
                 />
 

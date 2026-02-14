@@ -19,23 +19,27 @@ export function ProductCard({ product }: ProductCardProps) {
         <>
             <Card className="flex flex-col h-full overflow-hidden transition-all hover:border-black/50 group">
                 <CardHeader className="p-0 border-b aspect-[4/5] relative bg-muted overflow-hidden">
-                    {/* Image Placeholder - Will be real image later */}
-                    <div className="flex h-full w-full items-center justify-center text-muted-foreground transition-transform duration-500 group-hover:scale-105 bg-gray-100">
-                        {product.images && product.images[0] ? (
-                            <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
-                        ) : (
-                            <span className="text-4xl text-gray-300">Image</span>
-                        )}
-                    </div>
+                    <Link href={`/product/${product.slug}`} className="block h-full w-full">
+                        {/* Image Placeholder - Will be real image later */}
+                        <div className="flex h-full w-full items-center justify-center text-muted-foreground transition-transform duration-500 group-hover:scale-105 bg-gray-100">
+                            {product.images && product.images[0] ? (
+                                <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="text-4xl text-gray-300">Image</span>
+                            )}
+                        </div>
+                    </Link>
                     {product.status === 'PUBLISHED' && product.stock <= 0 && (
                         <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-wider z-10">Out of Stock</div>
                     )}
 
                     {/* Hover Overlay Button */}
-                    <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-gradient-to-t from-black/50 to-transparent flex gap-2">
-                        <Button className="flex-1 bg-white text-black hover:bg-gray-100" size="sm" onClick={() => setShowQuickView(true)}>
-                            Quick Shop
-                        </Button>
+                    <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-full group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 bg-gradient-to-t from-black/50 to-transparent flex gap-2 pointer-events-none">
+                        <div className="pointer-events-auto w-full">
+                            <Button className="w-full bg-white text-black hover:bg-gray-100" size="sm" onClick={() => setShowQuickView(true)}>
+                                Quick Shop
+                            </Button>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="grid gap-1 p-4">

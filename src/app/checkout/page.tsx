@@ -106,7 +106,7 @@ export default function CheckoutPage() {
 
     const handleConfirmPayment = async () => {
         // Validation
-        if (!formData.customerName || !formData.email || !formData.phone || !formData.address || !formData.city || !formData.district) {
+        if (!formData.customerName || !formData.phone || !formData.address || !formData.city || !formData.district) {
             toast.error("Please fill in all required shipping information.")
             return
         }
@@ -194,7 +194,7 @@ export default function CheckoutPage() {
                             />
                         </div>
                         <div className="grid w-full items-center gap-1.5">
-                            <Label htmlFor="email">Email Address *</Label>
+                            <Label htmlFor="email">Email Address</Label>
                             <Input
                                 id="email"
                                 name="email"

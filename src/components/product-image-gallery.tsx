@@ -34,12 +34,10 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
         <div className="space-y-4">
             {/* Main Image */}
             <div className="aspect-square relative bg-muted rounded-lg overflow-hidden border group">
-                <Image
+                <img
                     src={images[currentIndex]}
                     alt={`${productName} - Image ${currentIndex + 1}`}
-                    fill
-                    className="object-cover"
-                    priority
+                    className="h-full w-full object-cover"
                 />
 
                 {/* Navigation Arrows - Only show if multiple images */}
@@ -84,11 +82,10 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                                     : "border-transparent hover:border-muted-foreground"
                             )}
                         >
-                            <Image
+                            <img
                                 src={image}
                                 alt={`${productName} thumbnail ${index + 1}`}
-                                fill
-                                className="object-cover"
+                                className="h-full w-full object-cover"
                             />
                         </button>
                     ))}
