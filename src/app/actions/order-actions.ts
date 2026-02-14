@@ -208,3 +208,32 @@ export async function cancelMyOrder(orderId: string) {
         return { error: "Failed to cancel order" }
     }
 }
+
+// Admin Action: Delete Order permanently from database
+export async function deleteOrder(orderId: string) {
+    try {
+        await requireAdmin()
+
+        const order = await prisma.order.findUnique({ where: { id: orderId } })
+        if (!order) {
+            return { error: "Order not found" }
+        }
+
+        // Delete order items first (no cascade set in schema)
+        await prisma.orderItem.deleteMany({
+            where: { orderId: orderId },
+        })
+
+        // Delete the order
+        await prisma.order.delete({
+            where: { id: orderId },
+        })
+
+        revalidatePath("/admin/orders")
+        revalidatePath("/account/orders")
+        return { success: true }
+    } catch (error) {
+        console.error("Delete Order Error:", error)
+        return { error: "Failed to delete order" }
+    }
+}

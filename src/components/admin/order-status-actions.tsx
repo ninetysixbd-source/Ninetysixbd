@@ -10,9 +10,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { updateOrderStatus, cancelOrder } from "@/app/actions/order-actions"
+import { updateOrderStatus, cancelOrder, deleteOrder } from "@/app/actions/order-actions"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, Trash2 } from "lucide-react"
 
 interface OrderStatusActionsProps {
     orderId: string
@@ -30,12 +30,14 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
     const [status, setStatus] = useState(currentStatus)
     const [isPending, startTransition] = useTransition()
     const [isCancelling, setIsCancelling] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const router = useRouter()
 
     const isCancelled = currentStatus === "CANCELLED"
     const isDelivered = currentStatus === "DELIVERED"
-    const isLoading = isPending || isCancelling
+    const isLoading = isPending || isCancelling || isDeleting
 
     function handleStatusUpdate() {
         if (status === currentStatus) return
@@ -61,7 +63,6 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                 setShowConfirm(false)
             } else {
                 toast.success("Order cancelled successfully")
-                // Navigate away completely — no overlay to get stuck
                 window.location.href = "/admin/orders"
             }
         } catch {
@@ -71,86 +72,194 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         }
     }
 
-    if (isCancelled) {
-        return (
-            <div className="text-center py-4 text-red-600 font-semibold">
-                ❌ This order has been cancelled and cannot be modified.
-            </div>
-        )
+    async function handleDelete() {
+        setIsDeleting(true)
+        try {
+            const result = await deleteOrder(orderId)
+            if (result.error) {
+                toast.error(result.error)
+                setIsDeleting(false)
+                setShowDeleteConfirm(false)
+            } else {
+                toast.success("Order deleted permanently")
+                window.location.href = "/admin/orders"
+            }
+        } catch {
+            toast.error("Failed to delete order")
+            setIsDeleting(false)
+            setShowDeleteConfirm(false)
+        }
     }
 
-    return (
-        <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 flex gap-2">
-                <Select value={status} onValueChange={setStatus} disabled={isLoading}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {STATUS_OPTIONS.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <Button
-                    onClick={handleStatusUpdate}
-                    disabled={isLoading || status === currentStatus}
-                >
-                    {isPending ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Updating...
-                        </>
-                    ) : (
-                        "Update Status"
-                    )}
-                </Button>
-            </div>
-
-            {!isDelivered && (
-                <div>
-                    {!showConfirm ? (
+    if (isCancelled) {
+        return (
+            <div className="space-y-4">
+                <div className="text-center py-4 text-red-600 font-semibold">
+                    ❌ This order has been cancelled and cannot be modified.
+                </div>
+                <div className="flex justify-center">
+                    {!showDeleteConfirm ? (
                         <Button
                             variant="destructive"
-                            disabled={isLoading}
-                            onClick={() => setShowConfirm(true)}
+                            size="sm"
+                            onClick={() => setShowDeleteConfirm(true)}
+                            disabled={isDeleting}
                         >
-                            Cancel Order
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Order
                         </Button>
                     ) : (
                         <div className="flex items-center gap-2 p-3 border border-red-300 rounded-lg bg-red-50">
                             <span className="text-sm text-red-700 font-medium">
-                                Are you sure? This cannot be undone.
+                                Delete permanently? This removes the order from database.
                             </span>
                             <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={handleCancel}
-                                disabled={isCancelling}
+                                onClick={handleDelete}
+                                disabled={isDeleting}
                             >
-                                {isCancelling ? (
+                                {isDeleting ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Cancelling...
+                                        Deleting...
                                     </>
                                 ) : (
-                                    "Yes, Cancel"
+                                    "Yes, Delete"
                                 )}
                             </Button>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setShowConfirm(false)}
-                                disabled={isCancelling}
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={isDeleting}
                             >
                                 No, Keep
                             </Button>
                         </div>
                     )}
                 </div>
-            )}
+            </div>
+        )
+    }
+
+    return (
+        <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1 flex gap-2">
+                    <Select value={status} onValueChange={setStatus} disabled={isLoading}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {STATUS_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Button
+                        onClick={handleStatusUpdate}
+                        disabled={isLoading || status === currentStatus}
+                    >
+                        {isPending ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Updating...
+                            </>
+                        ) : (
+                            "Update Status"
+                        )}
+                    </Button>
+                </div>
+
+                <div className="flex gap-2">
+                    {!isDelivered && (
+                        <div>
+                            {!showConfirm ? (
+                                <Button
+                                    variant="destructive"
+                                    disabled={isLoading}
+                                    onClick={() => setShowConfirm(true)}
+                                >
+                                    Cancel Order
+                                </Button>
+                            ) : (
+                                <div className="flex items-center gap-2 p-3 border border-red-300 rounded-lg bg-red-50">
+                                    <span className="text-sm text-red-700 font-medium">
+                                        Are you sure? This cannot be undone.
+                                    </span>
+                                    <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        onClick={handleCancel}
+                                        disabled={isCancelling}
+                                    >
+                                        {isCancelling ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Cancelling...
+                                            </>
+                                        ) : (
+                                            "Yes, Cancel"
+                                        )}
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowConfirm(false)}
+                                        disabled={isCancelling}
+                                    >
+                                        No, Keep
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {!showDeleteConfirm ? (
+                        <Button
+                            variant="outline"
+                            disabled={isLoading}
+                            onClick={() => setShowDeleteConfirm(true)}
+                            className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                        </Button>
+                    ) : (
+                        <div className="flex items-center gap-2 p-3 border border-red-300 rounded-lg bg-red-50">
+                            <span className="text-sm text-red-700 font-medium">
+                                Delete permanently from database?
+                            </span>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    "Yes, Delete"
+                                )}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     )
 }
