@@ -67,10 +67,11 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             } else {
                 toast.success("Order cancelled successfully")
                 setIsCancelOpen(false)
-                // Small delay to let the dialog overlay close before refreshing
+                // Full page reload to ensure dialog overlay is completely removed
+                // router.refresh() is a soft-refresh that doesn't always unmount the Radix overlay
                 setTimeout(() => {
-                    router.refresh()
-                }, 150)
+                    window.location.reload()
+                }, 200)
             }
         })
     }
