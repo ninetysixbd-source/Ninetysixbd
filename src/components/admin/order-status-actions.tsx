@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select"
 import {
     AlertDialog,
-    AlertDialogAction,
     AlertDialogCancel,
     AlertDialogContent,
     AlertDialogDescription,
@@ -60,9 +59,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         })
     }
 
-    function handleCancel(e: React.MouseEvent) {
-        e.preventDefault()
-
+    function handleCancel() {
         startTransition(async () => {
             const result = await cancelOrder(orderId)
             if (result.error) {
@@ -130,9 +127,9 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel disabled={isPending}>Keep Order</AlertDialogCancel>
-                            <AlertDialogAction
+                            <Button
+                                variant="destructive"
                                 onClick={handleCancel}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 disabled={isPending}
                             >
                                 {isPending ? (
@@ -143,7 +140,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                                 ) : (
                                     "Yes, Cancel Order"
                                 )}
-                            </AlertDialogAction>
+                            </Button>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
