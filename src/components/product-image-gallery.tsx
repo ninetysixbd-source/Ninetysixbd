@@ -33,11 +33,26 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
     return (
         <div className="space-y-4">
             {/* Main Image */}
-            <div className="aspect-square relative bg-muted rounded-lg overflow-hidden border group">
+            <div
+                className="aspect-square relative bg-white rounded-lg overflow-hidden border group cursor-crosshair"
+                onMouseMove={(e) => {
+                    const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
+                    const x = ((e.clientX - left) / width) * 100
+                    const y = ((e.clientY - top) / height) * 100
+                    e.currentTarget.style.setProperty('--x', `${x}%`)
+                    e.currentTarget.style.setProperty('--y', `${y}%`)
+                }}
+                style={
+                    {
+                        "--x": "50%",
+                        "--y": "50%",
+                    } as React.CSSProperties
+                }
+            >
                 <img
                     src={images[currentIndex]}
                     alt={`${productName} - Image ${currentIndex + 1}`}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-contain transition-transform duration-200 ease-out hover:scale-[2] hover:origin-[var(--x)_var(--y)]"
                 />
 
                 {/* Navigation Arrows - Only show if multiple images */}
@@ -46,22 +61,28 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={goToPrevious}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            onClick={(e) => {
+                                e.stopPropagation(); // Prevent zoom trigger when clicking arrow
+                                goToPrevious();
+                            }}
                         >
                             <ChevronLeft className="h-6 w-6" />
                         </Button>
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={goToNext}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                goToNext();
+                            }}
                         >
                             <ChevronRight className="h-6 w-6" />
                         </Button>
 
                         {/* Image Counter */}
-                        <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm">
+                        <div className="absolute bottom-4 right-4 bg-black/60 text-white px-3 py-1 rounded-full text-sm z-10 pointer-events-none">
                             {currentIndex + 1} / {images.length}
                         </div>
                     </>
