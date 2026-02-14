@@ -67,7 +67,10 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             } else {
                 toast.success("Order cancelled successfully")
                 setIsCancelOpen(false)
-                router.refresh()
+                // Small delay to let the dialog overlay close before refreshing
+                setTimeout(() => {
+                    router.refresh()
+                }, 150)
             }
         })
     }

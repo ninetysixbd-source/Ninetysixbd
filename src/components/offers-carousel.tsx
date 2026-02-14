@@ -20,7 +20,7 @@ interface OffersCarouselProps {
 }
 
 export function OffersCarousel({ offers }: OffersCarouselProps) {
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 3000 })])
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 1500, stopOnInteraction: false, stopOnMouseEnter: true })])
     const [prevBtnEnabled, setPrevBtnEnabled] = React.useState(false)
     const [nextBtnEnabled, setNextBtnEnabled] = React.useState(false)
     const [selectedIndex, setSelectedIndex] = React.useState(0)
