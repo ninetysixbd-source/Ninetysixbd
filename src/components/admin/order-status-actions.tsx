@@ -39,11 +39,13 @@ const STATUS_OPTIONS = [
 export function OrderStatusActions({ orderId, currentStatus }: OrderStatusActionsProps) {
     const [status, setStatus] = useState(currentStatus)
     const [isPending, startTransition] = useTransition()
+    const [isCancelling, setIsCancelling] = useState(false)
     const router = useRouter()
     const [isCancelOpen, setIsCancelOpen] = useState(false)
 
     const isCancelled = currentStatus === "CANCELLED"
     const isDelivered = currentStatus === "DELIVERED"
+    const isLoading = isPending || isCancelling
 
     function handleStatusUpdate() {
         if (status === currentStatus) return
@@ -59,21 +61,27 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         })
     }
 
-    function handleCancel() {
-        startTransition(async () => {
+    // Cancel uses its own state instead of startTransition
+    // because startTransition defers state updates (including setIsCancelOpen),
+    // which prevents the dialog overlay from closing properly
+    async function handleCancel() {
+        setIsCancelling(true)
+        try {
             const result = await cancelOrder(orderId)
             if (result.error) {
                 toast.error(result.error)
+                setIsCancelling(false)
             } else {
-                toast.success("Order cancelled successfully")
+                // Close the dialog FIRST - this is immediate since it's not inside startTransition
                 setIsCancelOpen(false)
-                // Full page reload to ensure dialog overlay is completely removed
-                // router.refresh() is a soft-refresh that doesn't always unmount the Radix overlay
-                setTimeout(() => {
-                    window.location.reload()
-                }, 200)
+                toast.success("Order cancelled successfully")
+                // Navigate away to the orders list to guarantee clean state
+                router.push("/admin/orders")
             }
-        })
+        } catch {
+            toast.error("Failed to cancel order")
+            setIsCancelling(false)
+        }
     }
 
     if (isCancelled) {
@@ -87,7 +95,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
     return (
         <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 flex gap-2">
-                <Select value={status} onValueChange={setStatus} disabled={isPending}>
+                <Select value={status} onValueChange={setStatus} disabled={isLoading}>
                     <SelectTrigger className="w-[180px]">
                         <SelectValue />
                     </SelectTrigger>
@@ -101,7 +109,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                 </Select>
                 <Button
                     onClick={handleStatusUpdate}
-                    disabled={isPending || status === currentStatus}
+                    disabled={isLoading || status === currentStatus}
                 >
                     {isPending ? (
                         <>
@@ -117,7 +125,7 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
             {!isDelivered && (
                 <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
                     <AlertDialogTrigger asChild>
-                        <Button variant="destructive" disabled={isPending}>
+                        <Button variant="destructive" disabled={isLoading}>
                             Cancel Order
                         </Button>
                     </AlertDialogTrigger>
@@ -130,13 +138,13 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel disabled={isPending}>Keep Order</AlertDialogCancel>
+                            <AlertDialogCancel disabled={isCancelling}>Keep Order</AlertDialogCancel>
                             <Button
                                 variant="destructive"
                                 onClick={handleCancel}
-                                disabled={isPending}
+                                disabled={isCancelling}
                             >
-                                {isPending ? (
+                                {isCancelling ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                         Cancelling...
@@ -152,3 +160,4 @@ export function OrderStatusActions({ orderId, currentStatus }: OrderStatusAction
         </div>
     )
 }
+
