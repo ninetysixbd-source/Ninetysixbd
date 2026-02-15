@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Trash, Edit, Loader2 } from "lucide-react"
-import { useState, useTransition } from "react"
+import { useState } from "react"
 import { deleteProduct } from "@/app/actions/product-actions"
 import { toast } from "sonner"
 import {
@@ -30,6 +31,7 @@ interface ProductActionsProps {
 }
 
 export function ProductActions({ productId }: ProductActionsProps) {
+    const router = useRouter()
     const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
@@ -39,13 +41,15 @@ export function ProductActions({ productId }: ProductActionsProps) {
             const result = await deleteProduct(productId)
             if (result?.error) {
                 toast.error(result.error)
+                setOpen(false)
             } else {
                 toast.success("Product deleted successfully")
                 setOpen(false)
-                window.location.reload()
+                router.refresh()
             }
-        } catch (error) {
-            toast.error("An unexpected error occurred")
+        } catch {
+            toast.error("An unexpected error occurred while deleting the product")
+            setOpen(false)
         } finally {
             setIsDeleting(false)
         }
@@ -70,7 +74,10 @@ export function ProductActions({ productId }: ProductActionsProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         className="text-red-600 focus:text-red-600 cursor-pointer"
-                        onSelect={() => setOpen(true)}
+                        onSelect={(e) => {
+                            e.preventDefault()
+                            setOpen(true)
+                        }}
                     >
                         <Trash className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
@@ -92,12 +99,9 @@ export function ProductActions({ productId }: ProductActionsProps) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={(e) => {
-                                e.preventDefault()
-                                handleDelete()
-                            }}
-                            className="bg-red-600 hover:bg-red-700"
+                        <Button
+                            variant="destructive"
+                            onClick={handleDelete}
                             disabled={isDeleting}
                         >
                             {isDeleting ? (
@@ -108,7 +112,7 @@ export function ProductActions({ productId }: ProductActionsProps) {
                             ) : (
                                 "Delete Product"
                             )}
-                        </AlertDialogAction>
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

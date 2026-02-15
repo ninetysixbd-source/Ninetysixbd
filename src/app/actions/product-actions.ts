@@ -78,28 +78,28 @@ export async function deleteProduct(id: string) {
     await requireAdmin()
 
     try {
-        // Delete related order items first (no cascade on schema)
-        await prisma.orderItem.deleteMany({
-            where: { productId: id }
+        // Use a transaction to ensure both operations succeed or fail together
+        await prisma.$transaction(async (tx) => {
+            // Delete related order items first (no onDelete cascade in schema)
+            await tx.orderItem.deleteMany({
+                where: { productId: id },
+            })
+
+            // Delete the product
+            await tx.product.delete({
+                where: { id },
+            })
         })
 
-        // Delete the product
-        await prisma.product.delete({
-            where: { id }
-        })
-
-        // Attempt revalidation, but don't fail the action if this part errors
-        try {
-            revalidatePath("/admin/products")
-            revalidatePath("/")
-            revalidatePath("/products")
-        } catch (revalError) {
-            console.error("Revalidation failed:", revalError)
-        }
+        revalidatePath("/admin/products")
+        revalidatePath("/")
+        revalidatePath("/products")
 
         return { success: true }
-    } catch (error) {
-        console.error("Product deletion failed:", error)
-        return { error: "Failed to delete product" }
+    } catch (error: unknown) {
+        const message =
+            error instanceof Error ? error.message : "Unknown error"
+        console.error("Product deletion failed:", message)
+        return { error: "Failed to delete product. " + message }
     }
 }
