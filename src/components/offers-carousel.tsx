@@ -5,7 +5,6 @@ import useEmblaCarousel from "embla-carousel-react"
 import Autoplay from "embla-carousel-autoplay"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 interface Offer {
     id: string
@@ -20,7 +19,7 @@ interface OffersCarouselProps {
 }
 
 export function OffersCarousel({ offers }: OffersCarouselProps) {
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 1500, stopOnInteraction: false, stopOnMouseEnter: true })])
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })])
     const [prevBtnEnabled, setPrevBtnEnabled] = React.useState(false)
     const [nextBtnEnabled, setNextBtnEnabled] = React.useState(false)
     const [selectedIndex, setSelectedIndex] = React.useState(0)
@@ -58,27 +57,15 @@ export function OffersCarousel({ offers }: OffersCarouselProps) {
             <div className="h-full" ref={emblaRef}>
                 <div className="flex h-full">
                     {offers.map((offer) => (
-                        <div key={offer.id} className={`relative flex-[0_0_100%] min-w-0 h-full flex flex-col items-center justify-center p-8 text-center ${!offer.image ? offer.backgroundColor : 'bg-black/50'}`}>
-                            {/* Background Image */}
+                        <div key={offer.id} className={`relative flex-[0_0_100%] min-w-0 h-full ${!offer.image ? offer.backgroundColor : ''}`}>
+                            {/* Background Image - Only show the image, no text overlay */}
                             {offer.image && (
-                                <>
-                                    <img
-                                        src={offer.image}
-                                        alt={offer.title}
-                                        className="absolute inset-0 w-full h-full object-cover -z-20"
-                                    />
-                                    {/* Overlay for readability */}
-                                    <div className="absolute inset-0 bg-black/40 -z-10" />
-                                </>
+                                <img
+                                    src={offer.image}
+                                    alt={offer.title}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                />
                             )}
-
-                            <div className="relative z-10 text-white">
-                                <h2 className="text-4xl font-bold mb-4 drop-shadow-md">{offer.title}</h2>
-                                <p className="text-xl mb-6 drop-shadow-md opacity-90">{offer.description}</p>
-                                <Link href="/products?sort=discount">
-                                    <Button className="bg-white text-black hover:bg-white/90" size="lg">Shop Now</Button>
-                                </Link>
-                            </div>
                         </div>
                     ))}
                 </div>
