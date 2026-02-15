@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal, Trash, Edit, Loader2 } from "lucide-react"
 import { useState } from "react"
@@ -15,43 +14,31 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
 
 interface ProductActionsProps {
     productId: string
 }
 
 export function ProductActions({ productId }: ProductActionsProps) {
-    const router = useRouter()
-    const [open, setOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
     async function handleDelete() {
         setIsDeleting(true)
         try {
             const result = await deleteProduct(productId)
-            if (result?.error) {
+            if (result.error) {
                 toast.error(result.error)
-                setOpen(false)
+                setIsDeleting(false)
+                setShowDeleteConfirm(false)
             } else {
                 toast.success("Product deleted successfully")
-                setOpen(false)
-                router.push("/admin/products")
+                window.location.href = "/admin/products"
             }
         } catch {
-            toast.error("An unexpected error occurred while deleting the product")
-            setOpen(false)
-        } finally {
+            toast.error("Failed to delete product")
             setIsDeleting(false)
+            setShowDeleteConfirm(false)
         }
     }
 
@@ -72,50 +59,50 @@ export function ProductActions({ productId }: ProductActionsProps) {
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        className="text-red-600 focus:text-red-600 cursor-pointer"
-                        onSelect={(e) => {
-                            e.preventDefault()
-                            setOpen(true)
-                        }}
-                    >
-                        <Trash className="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
+                    {!showDeleteConfirm ? (
+                        <DropdownMenuItem
+                            className="text-red-600 focus:text-red-600 cursor-pointer"
+                            onSelect={(e) => {
+                                e.preventDefault()
+                                setShowDeleteConfirm(true)
+                            }}
+                        >
+                            <Trash className="mr-2 h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                    ) : (
+                        <div className="p-2">
+                            <div className="text-xs text-red-700 font-medium mb-2">
+                                Delete permanently?
+                            </div>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                >
+                                    {isDeleting ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        "Yes, Delete"
+                                    )}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setShowDeleteConfirm(false)}
+                                    disabled={isDeleting}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
-
-            <AlertDialog open={open} onOpenChange={setOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the product
-                            and remove it from our servers.
-                            <br /><br />
-                            <span className="font-bold text-red-600">
-                                Warning: This will also delete this product from any existing order history.
-                            </span>
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <Button
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeleting}
-                        >
-                            {isDeleting ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Deleting...
-                                </>
-                            ) : (
-                                "Delete Product"
-                            )}
-                        </Button>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </>
     )
 }
