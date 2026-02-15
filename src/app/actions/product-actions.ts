@@ -73,3 +73,27 @@ export async function getCategories() {
         }
     })
 }
+
+export async function deleteProduct(id: string) {
+    await requireAdmin()
+
+    try {
+        // Delete related order items first (no cascade on schema)
+        await prisma.orderItem.deleteMany({
+            where: { productId: id }
+        })
+
+        // Delete the product
+        await prisma.product.delete({
+            where: { id }
+        })
+
+        revalidatePath("/admin/products")
+        revalidatePath("/")
+        revalidatePath("/products")
+        return { success: true }
+    } catch (error) {
+        console.error("Product deletion failed:", error)
+        return { error: "Failed to delete product" }
+    }
+}

@@ -71,7 +71,7 @@ export default async function Home() {
       {/* Deals of the Week */}
       {dealProducts.length > 0 && (
         <section className="container py-12 bg-red-50/50 dark:bg-red-950/10 rounded-3xl my-8">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-8">
+          <div className="flex flex-col items-center justify-center space-y-4 text-center mb-8 hidden">
             <Badge variant="destructive" className="px-4 py-1 text-base">Limited Time Offers</Badge>
             <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">Deals of the Week</h2>
             <p className="max-w-[900px] text-muted-foreground">Grab these amazing discounts before they're gone!</p>

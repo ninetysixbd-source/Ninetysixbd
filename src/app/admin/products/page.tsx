@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { prisma } from "@/lib/prisma"
 import { Pagination } from "@/components/pagination"
+import { ProductActions } from "@/components/admin/product-actions"
 
 const ITEMS_PER_PAGE = 20
 
@@ -89,9 +90,7 @@ export default async function AdminProductsPage(props: AdminProductsPageProps) {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Button variant="ghost" size="sm" asChild>
-                                        <Link href={`/admin/products/${product.id}`}>Edit</Link>
-                                    </Button>
+                                    <ProductActions productId={product.id} />
                                 </TableCell>
                             </TableRow>
                         ))}
