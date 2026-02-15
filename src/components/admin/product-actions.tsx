@@ -45,7 +45,7 @@ export function ProductActions({ productId }: ProductActionsProps) {
             } else {
                 toast.success("Product deleted successfully")
                 setOpen(false)
-                router.refresh()
+                router.push("/admin/products")
             }
         } catch {
             toast.error("An unexpected error occurred while deleting the product")
