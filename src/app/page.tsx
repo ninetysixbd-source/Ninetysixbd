@@ -2,7 +2,6 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle, Truck, ShieldCheck, Tag } from "lucide-react"
-import { OffersCarousel } from "@/components/offers-carousel"
 import { ProductCard } from "@/components/product-card"
 import { SerializableProduct } from "@/lib/types"
 import { prisma } from "@/lib/prisma"
@@ -22,11 +21,7 @@ function serializeProduct(product: any): SerializableProduct {
 export const revalidate = 60 // Revalidate every minute
 
 export default async function Home() {
-  const [offers, featuredProductsData, dealProductsData, categories] = await Promise.all([
-    // Fetch offers
-    (prisma as any).offer.findMany({
-      orderBy: { createdAt: 'desc' }
-    }).catch(() => []),
+  const [featuredProductsData, dealProductsData, categories] = await Promise.all([
 
     // Fetch featured products (newest 8)
     prisma.product.findMany({
@@ -64,10 +59,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="container py-8">
-        <OffersCarousel offers={offers} />
-      </section>
+
 
       {/* Deals of the Week */}
       {dealProducts.length > 0 && (
