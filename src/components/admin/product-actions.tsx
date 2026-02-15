@@ -31,10 +31,11 @@ interface ProductActionsProps {
 
 export function ProductActions({ productId }: ProductActionsProps) {
     const [open, setOpen] = useState(false)
-    const [isDeleting, startTransition] = useTransition()
+    const [isDeleting, setIsDeleting] = useState(false)
 
-    function handleDelete() {
-        startTransition(async () => {
+    async function handleDelete() {
+        setIsDeleting(true)
+        try {
             const result = await deleteProduct(productId)
             if (result?.error) {
                 toast.error(result.error)
@@ -42,7 +43,11 @@ export function ProductActions({ productId }: ProductActionsProps) {
                 toast.success("Product deleted successfully")
                 setOpen(false)
             }
-        })
+        } catch (error) {
+            toast.error("An unexpected error occurred")
+        } finally {
+            setIsDeleting(false)
+        }
     }
 
     return (

@@ -22,7 +22,7 @@ export function SiteFooter() {
                         </p>
                         <div className="space-y-1 text-sm">
                             <p><span className="font-semibold">Email:</span> ninety6lifestyle@gmail.com</p>
-                            <p><span className="font-semibold">Phone:</span> +880 162 31396715</p>
+                            <p><span className="font-semibold">Phone:</span> +880 162 1396715</p>
                         </div>
                         <Link href="#" className="inline-block text-sm font-semibold border-b border-black pb-0.5 hover:text-muted-foreground transition-colors">
                             Get direction ↗

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle, Truck, ShieldCheck, Tag } from "lucide-react"
@@ -156,10 +157,12 @@ export default async function Home() {
                   <div className="aspect-[4/5] bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center text-muted-foreground group-hover:scale-105 transition-transform duration-500 relative">
                     {bgImage ? (
                       <>
-                        <img
+                        <Image
                           src={bgImage}
                           alt={category.name}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
                       </>
@@ -181,10 +184,12 @@ export default async function Home() {
       {/* Graffiti Banner */}
       <section className="container py-12">
         <div className="relative aspect-[21/9] w-full overflow-hidden rounded-xl shadow-2xl">
-          <img
+          <Image
             src="/ninetysix-banner.jpg"
             alt="NinetySix Graffiti Art"
-            className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-700"
+            priority={false}
           />
         </div>
       </section>
