@@ -42,6 +42,7 @@ export function ProductActions({ productId }: ProductActionsProps) {
             } else {
                 toast.success("Product deleted successfully")
                 setOpen(false)
+                window.location.reload()
             }
         } catch (error) {
             toast.error("An unexpected error occurred")

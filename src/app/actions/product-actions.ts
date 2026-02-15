@@ -88,9 +88,15 @@ export async function deleteProduct(id: string) {
             where: { id }
         })
 
-        revalidatePath("/admin/products")
-        revalidatePath("/")
-        revalidatePath("/products")
+        // Attempt revalidation, but don't fail the action if this part errors
+        try {
+            revalidatePath("/admin/products")
+            revalidatePath("/")
+            revalidatePath("/products")
+        } catch (revalError) {
+            console.error("Revalidation failed:", revalError)
+        }
+
         return { success: true }
     } catch (error) {
         console.error("Product deletion failed:", error)
